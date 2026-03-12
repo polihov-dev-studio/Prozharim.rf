@@ -125,15 +125,92 @@ function saveCart() {
   renderCartBadge();
 }
 
+function normalizeVariantIndex(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 1;
+}
+
+function getCartKey(id, variantIndex = 1) {
+  return `${id}__v${normalizeVariantIndex(variantIndex)}`;
+}
+
+function parseCartKey(key) {
+  const raw = String(key || "");
+  const match = raw.match(/^(.*)__v(\d+)$/);
+  if (match) {
+    return {
+      id: match[1],
+      variantIndex: normalizeVariantIndex(match[2])
+    };
+  }
+
+  return {
+    id: raw,
+    variantIndex: 1
+  };
+}
+
+function getProductVariants(product) {
+  if (!product) return [];
+
+  const variants = [];
+  const pushVariant = (index) => {
+    const suffix = index === 1 ? "" : String(index);
+    const priceValue = product[`price${suffix}`];
+    const weightValue = product[`weight${suffix}`];
+    const labelValue = product[`label${suffix}`] || product[`variant${suffix}`] || product[`size${suffix}`];
+
+    if (index !== 1 && (priceValue == null && weightValue == null && labelValue == null)) {
+      return;
+    }
+
+    variants.push({
+      index,
+      price: Number(priceValue ?? product.price ?? 0),
+      weight: String(weightValue ?? product.weight ?? "").trim(),
+      label: String(labelValue ?? weightValue ?? `Вариант ${index}`).trim(),
+      img: product[`img${suffix}`] || product.img || ""
+    });
+  };
+
+  pushVariant(1);
+
+  for (let i = 2; i <= 20; i += 1) {
+    const hasAny = product[`price${i}`] != null || product[`weight${i}`] != null || product[`label${i}`] != null || product[`variant${i}`] != null || product[`size${i}`] != null || product[`img${i}`] != null;
+    if (!hasAny) continue;
+    pushVariant(i);
+  }
+
+  return variants.filter(v => Number.isFinite(v.price));
+}
+
+function getVariantByIndex(product, variantIndex = 1) {
+  const variants = getProductVariants(product);
+  return variants.find(v => v.index === normalizeVariantIndex(variantIndex)) || variants[0] || {
+    index: 1,
+    price: Number(product?.price || 0),
+    weight: String(product?.weight || ""),
+    label: String(product?.weight || ""),
+    img: product?.img || ""
+  };
+}
+
+function getCartEntry(key) {
+  const { id, variantIndex } = parseCartKey(key);
+  const product = MENU.find(x => x.id === id);
+  const variant = getVariantByIndex(product, variantIndex);
+  return { id, variantIndex, product, variant, key };
+}
+
 function cartCount() {
   return Object.values(state.cart).reduce((a, b) => a + b, 0);
 }
 
 function cartSum() {
   let sum = 0;
-  for (const [id, qty] of Object.entries(state.cart)) {
-    const p = MENU.find(x => x.id === id);
-    if (p) sum += Number(p.price || 0) * qty;
+  for (const [key, qty] of Object.entries(state.cart)) {
+    const entry = getCartEntry(key);
+    if (entry.product) sum += Number(entry.variant.price || 0) * qty;
   }
   return Math.round(sum);
 }
@@ -183,8 +260,9 @@ function escapeHtml(s) {
   }[m]));
 }
 
-function addToCart(id, sourceEl = null) {
-  state.cart[id] = (state.cart[id] || 0) + 1;
+function addToCart(id, variantIndex = 1, sourceEl = null) {
+  const key = getCartKey(id, variantIndex);
+  state.cart[key] = (state.cart[key] || 0) + 1;
   saveCart();
 
   if (sourceEl) {
@@ -194,17 +272,17 @@ function addToCart(id, sourceEl = null) {
   showToast("Добавлено в корзину");
 }
 
-function decFromCart(id) {
-  if (!state.cart[id]) return;
-  state.cart[id] -= 1;
-  if (state.cart[id] <= 0) delete state.cart[id];
+function decFromCart(key) {
+  if (!state.cart[key]) return;
+  state.cart[key] -= 1;
+  if (state.cart[key] <= 0) delete state.cart[key];
   saveCart();
   renderCart();
   renderTotals();
 }
 
-function incFromCart(id) {
-  state.cart[id] = (state.cart[id] || 0) + 1;
+function incFromCart(key) {
+  state.cart[key] = (state.cart[key] || 0) + 1;
   saveCart();
   renderCart();
   renderTotals();
@@ -212,23 +290,24 @@ function incFromCart(id) {
 
 function renderCart() {
   els.cartItems.innerHTML = "";
-  const ids = Object.keys(state.cart);
+  const keys = Object.keys(state.cart);
 
-  if (ids.length === 0) {
+  if (keys.length === 0) {
     els.cartItems.innerHTML = `<div class="muted">Корзина пуста. Выберите блюда в каталоге.</div>`;
   } else {
-    for (const id of ids) {
-      const p = MENU.find(x => x.id === id);
+    for (const key of keys) {
+      const entry = getCartEntry(key);
+      const p = entry.product;
       if (!p) continue;
-      const qty = state.cart[id];
+      const qty = state.cart[key];
 
       const row = document.createElement("div");
       row.className = "cartItem";
       row.innerHTML = `
-        <img src="${p.img}" alt="">
+        <img src="${entry.variant.img || p.img}" alt="">
         <div>
           <div class="cartItem__name">${escapeHtml(p.name)}</div>
-          <div class="cartItem__meta">${rub(p.price)} • ${escapeHtml(p.weight || "")}</div>
+          <div class="cartItem__meta">${rub(entry.variant.price)}${entry.variant.weight ? ` • ${escapeHtml(entry.variant.weight)}` : ""}</div>
         </div>
         <div class="qty">
           <button type="button" data-act="dec">−</button>
@@ -237,8 +316,8 @@ function renderCart() {
         </div>
       `;
 
-      row.querySelector('[data-act="dec"]').addEventListener("click", () => decFromCart(id));
-      row.querySelector('[data-act="inc"]').addEventListener("click", () => incFromCart(id));
+      row.querySelector('[data-act="dec"]').addEventListener("click", () => decFromCart(key));
+      row.querySelector('[data-act="inc"]').addEventListener("click", () => incFromCart(key));
 
       els.cartItems.appendChild(row);
     }
@@ -248,26 +327,53 @@ function renderCart() {
 }
 
 function makeCard(p) {
+  const variants = getProductVariants(p);
+  const hasVariants = variants.length > 1;
   const el = document.createElement("div");
   el.className = "card";
   el.innerHTML = `
     <img class="card__img" src="${p.img}" alt="${escapeHtml(p.name)}">
     <div class="card__body">
       <div class="card__cat">${escapeHtml(p.category)}</div>
-      <div class="card__name">${escapeHtml(p.name)}</div>
+      <div class="card__nameRow">
+        <div class="card__name">${escapeHtml(p.name)}</div>
+        ${hasVariants ? `<select class="variantSelect" aria-label="Выбор варианта для ${escapeHtml(p.name)}">${variants.map(v => `<option value="${v.index}">${escapeHtml(v.label || v.weight || `Вариант ${v.index}`)}</option>`).join("")}</select>` : ""}
+      </div>
       <div class="card__desc">${escapeHtml(p.desc || "")}</div>
       <div class="card__row">
         <div>
-          <div class="price">${rub(p.price)}</div>
-          <div class="meta">${escapeHtml(p.weight || "")}</div>
+          <div class="price">${rub(variants[0]?.price ?? p.price)}</div>
+          <div class="meta">${escapeHtml(variants[0]?.weight || p.weight || "")}</div>
         </div>
         <button class="btn btn--primary" type="button">В корзину</button>
       </div>
     </div>
   `;
 
+  const priceEl = el.querySelector(".price");
+  const metaEl = el.querySelector(".meta");
+  const imgEl = el.querySelector(".card__img");
   const btn = el.querySelector("button");
-  btn.addEventListener("click", () => addToCart(p.id, el.querySelector(".card__img")));
+  const select = el.querySelector(".variantSelect");
+
+  const syncVariant = () => {
+    const variantIndex = normalizeVariantIndex(select?.value || 1);
+    const variant = getVariantByIndex(p, variantIndex);
+    priceEl.textContent = rub(variant.price);
+    metaEl.textContent = variant.weight || "";
+    if (variant.img) imgEl.src = variant.img;
+    return variantIndex;
+  };
+
+  if (select) {
+    select.addEventListener("change", syncVariant);
+    syncVariant();
+  }
+
+  btn.addEventListener("click", () => {
+    const variantIndex = syncVariant();
+    addToCart(p.id, variantIndex, imgEl);
+  });
 
   return el;
 }
@@ -322,19 +428,41 @@ function renderHits() {
 
   els.hits.innerHTML = "";
   for (const p of hits) {
+    const variants = getProductVariants(p);
+    const hasVariants = variants.length > 1;
     const it = document.createElement("div");
     it.className = "cartItem";
     it.innerHTML = `
       <img src="${p.img}" alt="">
       <div>
-        <div class="cartItem__name">${escapeHtml(p.name)}</div>
-        <div class="cartItem__meta">${rub(p.price)} • ${escapeHtml(p.weight || "")}</div>
+        <div class="hitRow">
+          <div class="cartItem__name">${escapeHtml(p.name)}</div>
+          ${hasVariants ? `<select class="variantSelect variantSelect--small" aria-label="Выбор варианта для ${escapeHtml(p.name)}">${variants.map(v => `<option value="${v.index}">${escapeHtml(v.label || v.weight || `Вариант ${v.index}`)}</option>`).join("")}</select>` : ""}
+        </div>
+        <div class="cartItem__meta">${rub(variants[0]?.price ?? p.price)}${(variants[0]?.weight || p.weight) ? ` • ${escapeHtml(variants[0]?.weight || p.weight || "")}` : ""}</div>
       </div>
       <div><button class="btn btn--primary" type="button">+</button></div>
     `;
 
+    const img = it.querySelector("img");
+    const meta = it.querySelector(".cartItem__meta");
+    const select = it.querySelector(".variantSelect");
     const btn = it.querySelector("button");
-    btn.addEventListener("click", () => addToCart(p.id, it.querySelector("img")));
+
+    const syncVariant = () => {
+      const variantIndex = normalizeVariantIndex(select?.value || 1);
+      const variant = getVariantByIndex(p, variantIndex);
+      meta.textContent = `${rub(variant.price)}${variant.weight ? ` • ${variant.weight}` : ""}`;
+      if (variant.img) img.src = variant.img;
+      return variantIndex;
+    };
+
+    if (select) {
+      select.addEventListener("change", syncVariant);
+      syncVariant();
+    }
+
+    btn.addEventListener("click", () => addToCart(p.id, syncVariant(), img));
 
     els.hits.appendChild(it);
   }
@@ -1019,15 +1147,19 @@ function setMode(mode) {
 /* ===== Payload ===== */
 
 function buildOrderPayload(form) {
-  const items = Object.entries(state.cart).map(([id, qty]) => {
-    const p = MENU.find(x => x.id === id);
+  const items = Object.entries(state.cart).map(([key, qty]) => {
+    const entry = getCartEntry(key);
+    const p = entry.product;
+    const variant = entry.variant;
     return {
-      id,
-      name: p?.name || id,
-      price: Number(p?.price || 0),
+      id: entry.id,
+      cartKey: key,
+      variant: variant.index,
+      name: p?.name || entry.id,
+      price: Number(variant.price || 0),
       qty,
-      sum: Number(p?.price || 0) * qty,
-      weight: p?.weight || ""
+      sum: Number(variant.price || 0) * qty,
+      weight: variant.weight || ""
     };
   });
 
