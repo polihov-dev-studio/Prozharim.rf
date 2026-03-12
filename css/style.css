@@ -310,11 +310,38 @@ a{color:inherit;text-decoration:none}
 .card__img{aspect-ratio:4/3; width:100%; object-fit:cover; background:#111}
 .card__body{padding:12px 12px 14px; display:grid; gap:10px}
 .card__cat{color:var(--muted); font-size:12px; letter-spacing:.12em; text-transform:uppercase}
+.card__nameRow{display:flex; align-items:center; justify-content:space-between; gap:10px}
 .card__name{font-weight:950}
 .card__desc{color:var(--muted); font-size:13px; min-height:34px}
 .card__row{display:flex; justify-content:space-between; align-items:center; gap:10px}
 .price{font-weight:950}
 .meta{color:var(--muted); font-size:12px}
+.hitRow{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.variantSelect{
+  min-width:84px;
+  max-width:132px;
+  padding:7px 28px 7px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  color:var(--txt);
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+  outline:none;
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:linear-gradient(45deg, transparent 50%, rgba(255,255,255,.75) 50%),linear-gradient(135deg, rgba(255,255,255,.75) 50%, transparent 50%);
+  background-position:calc(100% - 14px) calc(50% - 1px), calc(100% - 9px) calc(50% - 1px);
+  background-size:5px 5px, 5px 5px;
+  background-repeat:no-repeat;
+}
+.variantSelect:focus{border-color:rgba(var(--accentRgb),.45)}
+.variantSelect--small{min-width:74px; max-width:106px; padding-right:24px; font-size:11px}
+@media (max-width:560px){
+  .card__nameRow{align-items:flex-start; flex-direction:column}
+  .variantSelect{max-width:100%; width:100%}
+}
 
 .drawer,.modal{position:fixed; inset:0; display:none; z-index:50}
 .drawer.isOn,.modal.isOn{display:block}
