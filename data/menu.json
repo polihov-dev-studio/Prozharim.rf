@@ -171,6 +171,8 @@
     "desc": "",
     "price": 900,
     "weight": "670 г",
+    "price2": 500,
+    "weight2": "1 кг",
     "img": "./assets/photos/Пицца Пепперони.webp"
   },
   {
