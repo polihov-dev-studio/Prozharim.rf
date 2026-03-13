@@ -66,6 +66,85 @@ let ZONES_DAY = null;
 let ZONES_NIGHT = null;
 let PROMOS = [];
 
+let SITE_SETTINGS = null;
+
+function fillSelect(select, items) {
+  if (!select) return;
+  select.innerHTML = (items || []).map(v => `<option>${escapeHtml(v)}</option>`).join('');
+}
+
+function renderSettingsDrivenSections(settings) {
+  if (!settings || typeof settings !== 'object') return;
+  SITE_SETTINGS = settings;
+  if (settings.metaTitle) document.title = settings.metaTitle;
+  const metaDescription = document.getElementById('metaDescription');
+  if (metaDescription && settings.metaDescription) metaDescription.setAttribute('content', settings.metaDescription);
+  const favicon = document.getElementById('siteFavicon');
+  if (favicon && settings.favicon) favicon.setAttribute('href', settings.favicon);
+  const brandLogo = document.getElementById('brandLogo');
+  if (brandLogo && settings.logo) brandLogo.setAttribute('src', settings.logo);
+  const brandName = document.getElementById('brandName');
+  if (brandName && settings.siteName) brandName.textContent = settings.siteName;
+  const brandSub = document.getElementById('brandSub');
+  if (brandSub && settings.siteSub) brandSub.textContent = settings.siteSub;
+  const heroBadge = document.getElementById('heroBadge');
+  if (heroBadge && settings.heroBadge) heroBadge.textContent = settings.heroBadge;
+  const heroTitle = document.getElementById('heroTitle');
+  if (heroTitle && settings.heroTitleHtml) heroTitle.innerHTML = settings.heroTitleHtml;
+  const heroDesc = document.getElementById('heroDesc');
+  if (heroDesc && settings.heroDesc) heroDesc.textContent = settings.heroDesc;
+  const heroStats = document.getElementById('heroStats');
+  if (heroStats && Array.isArray(settings.heroStats)) {
+    heroStats.innerHTML = settings.heroStats.map(item => `
+      <div class="stat">
+        <div class="stat__num">${escapeHtml(item.num || '')}</div>
+        <div class="stat__txt">${escapeHtml(item.txt || '')}</div>
+      </div>`).join('');
+  }
+  const promoSlider = document.getElementById('promoSlider');
+  if (promoSlider && Array.isArray(settings.promotions)) {
+    promoSlider.innerHTML = settings.promotions.map(item => `
+      <article class="promoSlide">
+        <img class="promoSlide__img" src="${escapeHtml(item.img || '')}" alt="${escapeHtml(item.alt || item.title || 'Акция')}" />
+      </article>`).join('');
+  }
+  const contactsCards = document.getElementById('contactsCards');
+  if (contactsCards && Array.isArray(settings.contacts)) {
+    contactsCards.innerHTML = settings.contacts.map(item => `
+      <div class="contactCard">
+        <div class="contactCard__label">${escapeHtml(item.label || '')}</div>
+        <a class="contactCard__value" href="${escapeHtml(item.href || '#')}">${escapeHtml(item.text || '')}</a>
+      </div>`).join('');
+  }
+  const actions = document.getElementById('contactActions');
+  if (actions && Array.isArray(settings.socials)) {
+    actions.innerHTML = settings.socials.map(item => `
+      <a class="socialBtn" href="${escapeHtml(item.href || '#')}" ${item.kind === 'download' ? 'download' : 'target="_blank" rel="noopener noreferrer"'} aria-label="${escapeHtml(item.label || '')}">
+        <span>${escapeHtml(item.label || '')}</span>
+      </a>`).join('');
+  }
+  const footer = document.getElementById('footerText');
+  if (footer && settings.footerText) footer.innerHTML = settings.footerText;
+  fillSelect(document.getElementById('pickupAddressSelect'), settings.pickupAddresses || []);
+  const pickupList = document.getElementById('pickupList');
+  if (pickupList && Array.isArray(settings.pickupAddresses)) {
+    pickupList.innerHTML = settings.pickupAddresses.map(a => `<li>${escapeHtml(a)}</li>`).join('');
+  }
+  const deliveryInfo = settings.deliveryInfo || {};
+  const m = [
+    ['pickupTitle','pickupTitle'], ['pickupText','pickupText'],
+    ['deliveryTitle','deliveryTitle'], ['deliveryText','deliveryText'],
+    ['paymentTitle','paymentTitle'], ['paymentText','paymentText']
+  ];
+  for (const [id,key] of m) {
+    const el = document.getElementById(id);
+    if (el && deliveryInfo[key]) {
+      if (key.endsWith('Text')) el.innerHTML = deliveryInfo[key]; else el.textContent = deliveryInfo[key];
+    }
+  }
+}
+
+
 let state = {
   category: "Все",
   query: "",
@@ -1543,6 +1622,8 @@ async function init() {
     }
   });
 
+  SITE_SETTINGS = await fetch("data/settings.json").then(r => r.json()).catch(() => null);
+  renderSettingsDrivenSections(SITE_SETTINGS);
   MENU = await fetch("data/menu.json").then(r => r.json());
   PROMOS = await fetch("data/promokod.json").then(r => r.json()).then(parsePromos).catch(() => []);
   ZONES_DAY = await fetch("data/zones_day.geojson").then(r => r.json()).catch(() => null);

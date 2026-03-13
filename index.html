@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ПРОЖАРИМ — Grill & BBQ</title>
-  <meta name="description" content="Премиальный Grill & BBQ. Быстрая доставка, самовывоз. Оренбург." />
-  <link rel="icon" href="assets/logo.png" />
+  <title id="pageTitle">ПРОЖАРИМ — Grill & BBQ</title>
+  <meta id="metaDescription" name="description" content="Премиальный Grill & BBQ. Быстрая доставка, самовывоз. Оренбург." />
+  <link id="siteFavicon" rel="icon" href="assets/logo.png" />
   <link rel="stylesheet" href="css/style.css" />
 
   <!-- Yandex Maps -->
@@ -23,10 +23,10 @@
   <header class="header">
     <div class="wrap header__row">
       <a class="brand" href="#top" aria-label="ПРОЖАРИМ">
-        <img class="brand__logo" src="assets/logo.png" alt="ПРОЖАРИМ" />
+        <img id="brandLogo" class="brand__logo" src="assets/logo.png" alt="ПРОЖАРИМ" />
         <div class="brand__text">
-          <div class="brand__name">ПРОЖАРИМ</div>
-          <div class="brand__sub">GRILL & BBQ</div>
+          <div id="brandName" class="brand__name">ПРОЖАРИМ</div>
+          <div id="brandSub" class="brand__sub">GRILL & BBQ</div>
         </div>
       </a>
 
@@ -48,12 +48,12 @@
     <section class="hero">
       <div class="wrap hero__grid">
         <div class="hero__content">
-          <div class="pill">Оренбург • Работаем круглосуточно 24/7</div>
-          <h1 class="hero__title">
+          <div id="heroBadge" class="pill">Оренбург • Работаем круглосуточно 24/7</div>
+          <h1 id="heroTitle" class="hero__title">
             Огонь в каждом кусочке.
             <span class="grad">Grill & BBQ</span>
           </h1>
-          <p class="hero__desc">
+          <p id="heroDesc" class="hero__desc">
             Шашлык, горячее, супы, салаты, пицца, напитки. Готовим быстро, привозим горячим.
           </p>
           <div class="hero__cta">
@@ -61,7 +61,7 @@
             <a class="btn btn--ghost" href="#delivery">Условия доставки</a>
           </div>
 
-          <div class="hero__stats">
+          <div id="heroStats" class="hero__stats">
             <div class="stat">
               <div class="stat__num">~30–60</div>
               <div class="stat__txt">минут доставка*</div>
@@ -109,11 +109,11 @@
         <h2 class="section__title">Доставка и самовывоз</h2>
         <div class="infoGrid">
           <div class="infoCard">
-            <div class="infoCard__title">Самовывоз</div>
+            <div id="pickupTitle" class="infoCard__title">Самовывоз</div>
             <div class="infoCard__text">
-              Выбирайте удобную точку для самовывоза из ресторана.
+              <span id="pickupText">Выбирайте удобную точку для самовывоза из ресторана.</span>
             </div>
-            <ul class="list">
+            <ul id="pickupList" class="list">
               <li>Оренбург, Театральная 1/1</li>
               <li>Оренбург, 27 Линия 60</li>
               <li>Оренбург, Кичигина 8</li>
@@ -121,16 +121,16 @@
           </div>
 
           <div class="infoCard">
-            <div class="infoCard__title">Доставка</div>
+            <div id="deliveryTitle" class="infoCard__title">Доставка</div>
             <div class="infoCard__text">
-              Стоимость доставки определяется при оформлении заказа.
+              <span id="deliveryText">Стоимость доставки определяется при оформлении заказа.</span>
             </div>
           </div>
 
           <div class="infoCard">
-            <div class="infoCard__title">Оплата</div>
+            <div id="paymentTitle" class="infoCard__title">Оплата</div>
             <div class="infoCard__text">
-              • Оплата наличными<br>• Оплата картой<br>• Оплата переводом<br>• Оплата по QR-коду
+              <span id="paymentText">• Оплата наличными<br>• Оплата картой<br>• Оплата переводом<br>• Оплата по QR-коду</span>
             </div>
           </div>
         </div>
@@ -143,27 +143,7 @@
           <h2 class="section__title">Акции</h2>
         </div>
 
-        <div class="promoSlider" aria-label="Акции ресторана">
-          <article class="promoSlide">
-            <img class="promoSlide__img" src="assets/promos/promo-prozharim-1.svg" alt="Акция">
-            <!--<img class="promoSlide__img" src="assets/promos/promo-1.svg" alt="Скидка на день рождения">
-            <div class="promoSlide__content">
-              <div class="promoSlide__badge">Скидка</div>
-              <div class="promoSlide__title">День рождения</div>
-              <div class="promoSlide__text">Используйте промокод birthday и получите скидку на заказ. Размер скидки можно менять в promokod.json.</div>
-          </div>-->
-          </article>
-
-          <article class="promoSlide">
-            <img class="promoSlide__img" src="assets/promos/promo-prozharim-2.svg" alt="Бесплатные приборы">
-            <!--<div class="promoSlide__content">
-              <div class="promoSlide__badge">Комфорт</div>
-              <div class="promoSlide__title">До 5 приборов бесплатно</div>
-              <div class="promoSlide__text">Выбирайте количество приборов при оформлении. Начиная с 6-го — по 6 ₽ за каждый дополнительный прибор.</div>
-          </div>-->
-          </article>
-          
-        </div>
+        <div id="promoSlider" class="promoSlider" aria-label="Акции ресторана"></div>
       </div>
     </section>
 
@@ -173,19 +153,10 @@
           <div>
             <h2 class="section__title">Контакты</h2>
           </div>
-          <div class="contacts__cards">
-            <div class="contactCard">
-              <div class="contactCard__label">Телефон</div>
-              <a class="contactCard__value" href="tel:+73532570767">+7 (3532) 570-767</a>
-            </div>
-            <div class="contactCard">
-              <div class="contactCard__label">Телефон</div>
-              <a class="contactCard__value" href="tel:+73532603605">+7 (3532) 603-605</a>
-            </div>
-          </div>
+          <div id="contactsCards" class="contacts__cards"></div>
         </div>
 
-        <div class="contactActions">
+        <div id="contactActions" class="contactActions">
           <!-- <a class="socialBtn" href="https://vk.com/" target="_blank" rel="noopener noreferrer" aria-label="ВКонтакте">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.6 7.9c.1-.3.4-.4.8-.4h2.7c.3 0 .5.1.6.4.7 1.7 1.4 3 2.3 4.2.3.4.5.5.7.5.2 0 .3-.1.3-.6V8.3c0-.5.1-.8.4-.8h2.4c.2 0 .4.1.5.2.1.1.1.3.1.5v2.1c0 .7 0 1.4-.1 2.1 0 .2.1.3.2.3.1 0 .3-.1.5-.3.9-.9 1.7-2 2.4-3.4.1-.3.4-.4.7-.4h2.7c.4 0 .7.2.5.6-.4 1-.9 1.9-1.5 2.8-.5.8-1.1 1.5-1.8 2.2-.2.2-.2.4 0 .6.7.6 1.3 1.2 1.9 1.9.6.7 1 1.3 1.4 2 .2.4 0 .6-.4.6h-3c-.4 0-.6-.1-.8-.4-.4-.6-.8-1.1-1.3-1.6-.5-.5-.9-.7-1.1-.6-.2.1-.3.3-.3.7v1.2c0 .4-.1.6-.2.7-.1.1-.3.2-.6.2h-1.4c-1 0-2-.4-3-1.1-1-.7-1.9-1.6-2.6-2.7-.8-1.1-1.4-2.4-1.9-3.8-.1-.2-.1-.4 0-.6Z" fill="currentColor"/></svg>
             <span>VK</span>
@@ -203,7 +174,7 @@
         <footer class="footer">
           <div class="footer__line"></div>
           <div class="footer__row">
-            <div class="muted">© 2026 • ПРОЖАРИМ<br>ИП РАЗИН СТЕПАН ВАДИМОВИЧ ИНН 026202946041</div>
+            <div id="footerText" class="muted">© 2026 • ПРОЖАРИМ<br>ИП РАЗИН СТЕПАН ВАДИМОВИЧ ИНН 026202946041</div>
             <a class="footer__policy" href="privacy.html">Политика конфиденциальности</a>
           </div>
         </footer>
@@ -268,11 +239,7 @@
         <div class="field" id="pickupBlock" hidden>
           <label>Адрес самовывоза</label>
           <div class="selectWrap">
-            <select name="pickupAddress" class="selectNative">
-              <option>Оренбург, Театральная 1/1</option>
-              <option>Оренбург, 27 Линия 60</option>
-              <option>Оренбург, Кичигина 8</option>
-            </select>
+            <select id="pickupAddressSelect" name="pickupAddress" class="selectNative"></select>
             <span class="selectCaret" aria-hidden="true"></span>
           </div>
         </div>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Прожарим — Панель управления</title>
+  <link rel="stylesheet" href="./css/admin.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">P</div><div><div class="brand-title">Прожарим</div><div class="brand-sub">Панель управления</div></div></div>
+      <div class="nav">
+        <button class="active" data-tab="dashboard">Обзор</button>
+        <button data-tab="settings">Настройки сайта</button>
+        <button data-tab="menu">Меню</button>
+        <button data-tab="promos">Промокоды</button>
+        <button data-tab="banners">Акции и баннеры</button>
+        <button data-tab="zones">Зоны доставки</button>
+        <button data-tab="raw">Raw JSON</button>
+      </div>
+      <div class="foot"><button id="logoutBtn" class="btn2" style="width:100%">Выйти</button></div>
+    </aside>
+    <main class="main">
+      <div id="notice" class="notice"></div>
+      <div class="topbar"><div><h1 id="pageTitle">Обзор</h1><div class="muted">Управление сайтом Прожарим через Cloudflare Worker и GitHub</div></div><div class="actions"><button id="reloadBtn" class="btn2">Обновить</button><button id="saveAllBtn" class="btn">Сохранить всё</button></div></div>
+
+      <section class="section active" id="tab-dashboard">
+        <div class="grid4">
+          <div class="card"><div class="muted">Позиции меню</div><div id="statMenu" class="stat-value">0</div></div>
+          <div class="card"><div class="muted">Категории</div><div id="statCats" class="stat-value">0</div></div>
+          <div class="card"><div class="muted">Промокоды</div><div id="statPromos" class="stat-value">0</div></div>
+          <div class="card"><div class="muted">Зоны доставки</div><div id="statZones" class="stat-value">0</div></div>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="card"><div class="headrow"><strong>Быстрые действия</strong></div><div class="row"><button id="quickNewItem" class="btn">Новый товар</button><button id="quickNewPromo" class="btn2">Новый промокод</button><button id="quickBanner" class="btn2">Загрузить SVG</button></div></div>
+          <div class="card"><div class="headrow"><strong>Сводка</strong></div><div id="dashboardSummary" class="muted"></div></div>
+        </div>
+      </section>
+
+      <section class="section" id="tab-settings">
+        <div class="card">
+          <div class="headrow"><strong>Основные настройки сайта</strong></div>
+          <form id="settingsForm" class="form">
+            <div class="field"><label>Meta title</label><input class="input" id="s-metaTitle"></div>
+            <div class="field"><label>Meta description</label><input class="input" id="s-metaDescription"></div>
+            <div class="field"><label>Название бренда</label><input class="input" id="s-siteName"></div>
+            <div class="field"><label>Подзаголовок бренда</label><input class="input" id="s-siteSub"></div>
+            <div class="field span2"><label>Плашка над заголовком</label><input class="input" id="s-heroBadge"></div>
+            <div class="field span2"><label>Hero заголовок (HTML разрешён)</label><textarea id="s-heroTitleHtml"></textarea></div>
+            <div class="field span2"><label>Hero описание</label><textarea id="s-heroDesc"></textarea></div>
+            <div class="field"><label>Логотип (путь)</label><input class="input mono" id="s-logo"></div>
+            <div class="field"><label>Favicon (путь)</label><input class="input mono" id="s-favicon"></div>
+            <div class="field"><label>Загрузить логотип</label><input type="file" id="logoUpload" accept="image/*"><img id="logoPreview" class="assetPreview hidden"></div>
+            <div class="field"><label>Загрузить favicon</label><input type="file" id="faviconUpload" accept="image/*,.ico"><img id="faviconPreview" class="assetPreview hidden"></div>
+            <div class="field span2"><label>Самовывоз (по одному адресу на строку)</label><textarea id="s-pickupAddresses"></textarea></div>
+            <div class="field span2"><label>Текст footer (HTML разрешён)</label><textarea id="s-footerText"></textarea></div>
+            <div class="field span2"><label>Контакты (JSON массив)</label><textarea id="s-contacts" class="mono"></textarea></div>
+            <div class="field span2"><label>Социальные кнопки / ссылки (JSON массив)</label><textarea id="s-socials" class="mono"></textarea></div>
+            <div class="field span2"><label>Hero stats (JSON массив)</label><textarea id="s-heroStats" class="mono"></textarea></div>
+            <div class="field span2"><label>Блок доставки (JSON объект)</label><textarea id="s-deliveryInfo" class="mono"></textarea></div>
+            <div class="span2 row"><button class="btn" type="submit">Применить настройки</button></div>
+          </form>
+        </div>
+      </section>
+
+      <section class="section" id="tab-menu">
+        <div class="gridSide">
+          <div class="card">
+            <div class="headrow"><strong>Позиции меню</strong><button id="newItemBtn" class="btn">Новый товар</button></div>
+            <div class="toolbar"><input class="input" id="menuSearch" placeholder="Поиск..."><select id="menuCategoryFilter"></select></div>
+            <div id="menuList" class="items"></div>
+          </div>
+          <div class="card">
+            <div class="headrow"><strong>Редактор товара</strong></div>
+            <form id="menuForm" class="form">
+              <div class="field"><label>ID</label><input class="input" id="m-id"></div>
+              <div class="field"><label>Категория</label><input class="input" id="m-category"></div>
+              <div class="field"><label>Название</label><input class="input" id="m-name"></div>
+              <div class="field"><label>Описание</label><input class="input" id="m-desc"></div>
+              <div class="field"><label>Цена</label><input class="input" type="number" id="m-price"></div>
+              <div class="field"><label>Вес</label><input class="input" id="m-weight"></div>
+              <div class="field"><label>Изображение (путь)</label><input class="input mono" id="m-img"></div>
+              <div class="field"><label>Загрузить фото</label><input type="file" id="menuImageUpload" accept="image/*"></div>
+              <div class="field span2"><label>Доп. варианты (JSON объект: price2, weight2, label2...)</label><textarea id="m-extras" class="mono"></textarea></div>
+              <div class="field span2 switches"><label><input type="checkbox" id="m-hit"> hit</label><label><input type="checkbox" id="m-hidden"> hidden</label></div>
+              <div class="span2 row"><button class="btn" type="submit">Применить</button><button class="btn2" type="button" id="cloneItemBtn">Дублировать</button><button class="btnDanger" type="button" id="deleteItemBtn">Удалить</button></div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="tab-promos">
+        <div class="gridSide">
+          <div class="card"><div class="headrow"><strong>Промокоды</strong><button id="newPromoBtn" class="btn">Новый промокод</button></div><div id="promoList" class="items"></div></div>
+          <div class="card"><div class="headrow"><strong>Редактор промокода</strong></div><form id="promoForm" class="form"><div class="field"><label>Название</label><input class="input" id="p-title"></div><div class="field"><label>Код</label><input class="input" id="p-code"></div><div class="field"><label>Скидка %</label><input class="input" type="number" id="p-percent"></div><div class="field switches"><label><input type="checkbox" id="p-active"> active</label></div><div class="span2 row"><button class="btn" type="submit">Применить</button><button class="btnDanger" type="button" id="deletePromoBtn">Удалить</button></div></form></div>
+        </div>
+      </section>
+
+      <section class="section" id="tab-banners">
+        <div class="grid2">
+          <div class="card"><div class="headrow"><strong>SVG акции и баннеры</strong></div><div class="toolbar"><input type="file" id="bannerUpload" accept=".svg,image/svg+xml"><button id="addBannerBtn" class="btn">Загрузить SVG</button></div><div id="bannerList" class="items"></div></div>
+          <div class="card"><div class="headrow"><strong>Порядок показа</strong></div><div class="muted">Порядок баннеров хранится в <span class="mono">data/settings.json → promotions</span>. Можно добавлять, удалять и сортировать вверх/вниз.</div><div id="bannerOrder" class="items" style="margin-top:14px"></div></div>
+        </div>
+      </section>
+
+      <section class="section" id="tab-zones">
+        <div class="card">
+          <div class="headrow"><strong>Редактор зон доставки</strong><div class="tabsInline"><button class="active" data-zone-source="day">День</button><button data-zone-source="night">Ночь</button><button data-zone-source="base">Base</button></div></div>
+          <div class="grid2">
+            <div><div id="adminMap" class="mapWrapAdmin"></div><div class="muted small" style="margin-top:10px">Рисование/редактирование: включено. У каждой зоны есть свойства <span class="mono">zone</span>, <span class="mono">restaurant</span>, <span class="mono">deliveryPrice</span>.</div></div>
+            <div><div class="row" style="margin-bottom:10px"><button id="newZoneMetaBtn" class="btn2">Обновить список зон</button></div><div id="zoneList" class="zoneList"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="tab-raw">
+        <div class="grid2">
+          <div class="card"><div class="headrow"><strong>settings.json</strong></div><textarea id="rawSettings" class="mono codearea"></textarea><div class="row"><button id="applyRawSettings" class="btn">Применить</button></div></div>
+          <div class="card"><div class="headrow"><strong>menu.json</strong></div><textarea id="rawMenu" class="mono codearea"></textarea><div class="row"><button id="applyRawMenu" class="btn">Применить</button></div></div>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="card"><div class="headrow"><strong>promokod.json</strong></div><textarea id="rawPromos" class="mono codearea"></textarea><div class="row"><button id="applyRawPromos" class="btn">Применить</button></div></div>
+          <div class="card"><div class="headrow"><strong>Текущий geojson</strong></div><textarea id="rawZones" class="mono codearea"></textarea><div class="row"><button id="applyRawZones" class="btn">Применить</button></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="./js/admin.js"></script>
+</body>
+</html>

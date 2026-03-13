@@ -1,0 +1,77 @@
+{
+  "metaTitle": "ПРОЖАРИМ — Grill & BBQ",
+  "metaDescription": "Премиальный Grill & BBQ. Быстрая доставка, самовывоз. Оренбург.",
+  "siteName": "ПРОЖАРИМ",
+  "siteSub": "GRILL & BBQ",
+  "logo": "assets/logo.png",
+  "favicon": "assets/logo.png",
+  "heroBadge": "Оренбург • Работаем круглосуточно 24/7",
+  "heroTitleHtml": "Огонь в каждом кусочке.<br><span class=\"grad\">Grill & BBQ</span>",
+  "heroDesc": "Шашлык, горячее, супы, салаты, пицца, напитки. Готовим быстро, привозим горячим.",
+  "heroStats": [
+    {
+      "num": "~30–60",
+      "txt": "минут доставка*"
+    },
+    {
+      "num": "3",
+      "txt": "точки самовывоза"
+    },
+    {
+      "num": "24/7",
+      "txt": "Работаем круглосуточно"
+    }
+  ],
+  "contacts": [
+    {
+      "label": "Телефон",
+      "href": "tel:+73532570767",
+      "text": "+7 (3532) 570-767"
+    },
+    {
+      "label": "Телефон",
+      "href": "tel:+73532603605",
+      "text": "+7 (3532) 603-605"
+    }
+  ],
+  "socials": [
+    {
+      "label": "RuStore",
+      "href": "https://www.rustore.ru/",
+      "kind": "link"
+    },
+    {
+      "label": ".APK",
+      "href": "assets/app.apk",
+      "kind": "download"
+    }
+  ],
+  "pickupAddresses": [
+    "Оренбург, Театральная 1/1",
+    "Оренбург, 27 Линия 60",
+    "Оренбург, Кичигина 8"
+  ],
+  "deliveryInfo": {
+    "pickupTitle": "Самовывоз",
+    "pickupText": "Выбирайте удобную точку для самовывоза из ресторана.",
+    "deliveryTitle": "Доставка",
+    "deliveryText": "Стоимость доставки определяется при оформлении заказа.",
+    "paymentTitle": "Оплата",
+    "paymentText": "• Оплата наличными<br>• Оплата картой<br>• Оплата переводом<br>• Оплата по QR-коду"
+  },
+  "footerText": "© 2026 • ПРОЖАРИМ<br>ИП РАЗИН СТЕПАН ВАДИМОВИЧ ИНН 026202946041",
+  "promotions": [
+    {
+      "img": "assets/promos/promo-prozharim-1.svg",
+      "alt": "Акция 1",
+      "title": "Акция",
+      "text": ""
+    },
+    {
+      "img": "assets/promos/promo-prozharim-2.svg",
+      "alt": "Акция 2",
+      "title": "Акция",
+      "text": ""
+    }
+  ]
+}
